@@ -1,0 +1,102 @@
+---
+title: "Eigenvectors from Eigenvalues"
+author: "Jesús M. Castagnetto"
+date: "11/21/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Motivation
+
+There is a very interesting new result that indicates that the
+eigenvectors for a Hermitian (symmetric) matrix, can be calculated from the eigenvalues ["EIGENVECTORS FROM EIGENVALUES" PETER B. DENTON, STEPHEN J. PARKE, TERENCE TAO, AND XINING ZHANG](https://arxiv.org/pdf/1908.03795.pdf)
+
+In this document, I am trying to (kludgily) repeat, using **R**, the excercise that Corey Chivers did in Python at: http://predictivehealthcare.pennmedicine.org/Eigenvectors%20from%20Eigenvalues.html
+
+## Step 1: do the calculations with R's matrix operations
+
+Let's make our matrix `x` and make sure is Hermitian (symmetric)
+
+```{r}
+set.seed(20191121)
+n = 5
+N = n*n
+x <- rnorm(N)
+dim(x) <- c(n, n)
+for(i in 1:n){
+  for (j in i:n) {
+    x[j, i ] <- x[i, j]
+  }
+}
+isSymmetric(x)
+x
+```
+
+Now, we will calculate the eigenvectors and eigenvalues the usual way
+
+```{r}
+eig <- eigen(x)
+eig$values
+(result <- abs(eig$vectors))
+```
+
+## Step 2: Let's calculate using the calculations from the paper
+
+We prepare the vectors and intermediate matrix needed for the calculations
+
+```{r}
+# the eigenvalues of x
+lambda_a <- eig$values
+# an appropriate matrix
+lambda_m <- matrix(nrow = n, ncol = n - 1)
+# index list
+tidx <- 1:5
+for (j in 1:n) {
+  idx <- tidx[-j]
+  Mj <-  x[idx,idx]
+  lambda_m[j,] <-  eigen(Mj)$values
+}
+```
+
+Then we estimate de eigenvectors
+
+```{r}
+v_norm <- matrix(data = 0, nrow = n, ncol = n)
+for(i in 1:n) {
+  for(j in 1:n) {
+    numerator <- 1
+    denominator <- 1
+    for(k in 1:(n - 1)){
+      numerator <- numerator * (lambda_a[i] - lambda_m[j, k])
+    }
+    for(k in 1:n) {
+      if (k != i) {
+        denominator <- denominator * (lambda_a[i] - lambda_a[k])
+      }
+    }
+    v_norm[i, j] <- numerator / denominator
+  }
+}
+# the eigenvectors using the new result from the paper
+new_result <- t(sqrt(v_norm))
+```
+
+## Step 3: Let's compare them
+
+```{r}
+# the original eigenvector in absolute value
+result
+# and the one made using the new formula
+new_result
+```
+
+They seem to be about the same, let's use the same tolerance as Corey's:
+
+```{r}
+abs(result - new_result) < 1e-10
+```
+
+Cool!
