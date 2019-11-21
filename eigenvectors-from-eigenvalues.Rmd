@@ -43,7 +43,7 @@ eig$values
 (result <- abs(eig$vectors))
 ```
 
-## Step 2: Let's calculate using the calculations from the paper
+## Step 2: Let's calculate using the results from the paper
 
 We prepare the vectors and intermediate matrix needed for the calculations
 
