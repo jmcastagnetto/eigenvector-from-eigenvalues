@@ -1,7 +1,7 @@
 ---
 title: "Eigenvectors from Eigenvalues"
 author: "Jesús M. Castagnetto"
-date: "11/21/2019"
+date: "2019-11-21"
 output: html_document
 ---
 
@@ -100,3 +100,5 @@ abs(result - new_result) < 1e-10
 ```
 
 Cool!
+
+[@jmcastagnetto](https://twitter.com/jmcastagnetto)
